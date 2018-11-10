@@ -1,49 +1,107 @@
-## 05 - Check Point
+## Pattern 1
 
-In this branch, we will walk through the project directory. Lot of pattern already exist on React Community.
+### Passing Props from Parent to Child
 
-```shell
-├── App.js
-├── constants
-│   ├── appPreset.js
-│   ├── categories.js
-│   ├── colors.js
-│   ├── fixture.js
-│   └── textPresets.js
-├── core-ui
-│   ├── Button.js
-│   ├── Card.js
-│   ├── DropDown.js
-│   ├── Icon.js
-│   ├── Separator.js
-│   ├── Text.js
-│   ├── TextField.js
-│   └── index.js
-├── images
-│   └── logo.png
-├── screens
-│   └── Login
-│       └── Login.js
-└── types
-    └── index.js
+As you might notice, passing props directly from parent to children is a way to go in many cases.
+
+## Task
+
+The goal is to refactor `Login Screen` into class based component:
+
+```js
+// @flow
+
+import React from 'react';
+import {
+  View,
+  StyleSheet,
+  Image,
+  TextInput,
+  KeyboardAvoidingView,
+} from 'react-native';
+
+import {Button, Text} from '../../core-ui';
+import {WHITE, BLUE_SEA, LIGHT_GREY} from '../../constants/colors';
+import Logo from '../../images/logo.png';
+
+type InputType = 'EMAIL' | 'PASSWORD';
+
+type Props = {|
+  email?: string,
+  onChangeEmail: (string) => void,
+  password?: string,
+  onChangePassword: (string) => void,
+  setActiveTextInput: (InputType) => void,
+  activeTextInput?: ?InputType,
+  onSubmit: () => void,
+|};
+
+function Login(props: Props) {
+  let {
+    email,
+    password,
+    activeTextInput,
+    setActiveTextInput,
+    onSubmit,
+    onChangeEmail,
+    onChangePassword,
+  } = props;
+  return (
+    <View style={styles.root}>
+      <KeyboardAvoidingView behavior="padding">
+        <View style={styles.header}>
+          <Image source={Logo} style={{height: 200}} resizeMode="contain" />
+        </View>
+        <View>
+          <Text>Username or Email</Text>
+          <TextInput
+            value={email}
+            onChangeText={onChangeEmail}
+            onFocus={() => setActiveTextInput('EMAIL')}
+            style={[
+              styles.textInput,
+              activeTextInput === 'EMAIL' && styles.activeTextInput,
+            ]}
+          />
+          <Text>Password</Text>
+          <TextInput
+            secureTextEntry
+            value={password}
+            onChangeText={onChangePassword}
+            onFocus={() => setActiveTextInput('PASSWORD')}
+            style={[
+              styles.textInput,
+              activeTextInput === 'PASSWORD' && styles.activeTextInput,
+            ]}
+          />
+        </View>
+        <Button text="SIGN IN" onPress={onSubmit} />
+      </KeyboardAvoidingView>
+    </View>
+  );
+}
+
+let styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    padding: 40,
+    backgroundColor: WHITE,
+    justifyContent: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 50,
+  },
+  activeTextInput: {
+    borderBottomColor: BLUE_SEA,
+  },
+  textInput: {
+    height: 40,
+    borderBottomColor: LIGHT_GREY,
+    borderBottomWidth: 2,
+    marginBottom: 50,
+  },
+});
+
+export default Login;
 ```
-
-Here's, after trying several patterns. For example, `container`, `components` structure. We found those patterns are really difficult to work with when the codebase grows. For example, at the beginning, we think some components are really just stateless component. But, when the feature is addeed, it became clear that the component should be inside `containers`. Secondly, we found that naming thing is difficult. When we are flatten the structure, the naming becomes problematic. Sometimes, we ended up using different suffix. For example, `CardContainer`, `CardWrapper`, `CardContainerWrapper`, and it's really difficult to know what component does unless we see the code.
-
-## Core-UI
-
-Inside the core-ui, we put the ui that is (like its name), core. So, every React Component can actually using this for the sake of design consitency.
-
-## Constants
-
-Sometime, we might ended up adding more variables locally, inside the component. While it might be easy to add, but it will difficult to reason later. Especially, when design changes.
-
-## types
-
-Type will contain the type that will be shared accross the project.
-
-## screens / features
-
-If the application is small, we tend to put the screen directly inside `src` directory.
-
-> I think the bast way to structure your react project is by trying. There's no one size fits for all cases. Change the structure until you're happy to work with, and adding the feature is a breeze!
