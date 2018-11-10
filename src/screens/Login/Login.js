@@ -1,6 +1,6 @@
 // @flow
 
-import React from 'react';
+import React, {Component} from 'react';
 import {
   View,
   StyleSheet,
@@ -13,61 +13,66 @@ import {Button, Text} from '../../core-ui';
 import {WHITE, BLUE_SEA, LIGHT_GREY} from '../../constants/colors';
 import Logo from '../../images/logo.png';
 
-type InputType = 'EMAIL' | 'PASSWORD';
+type State = {
+  email: string,
+  password: string,
+  activeTextInput: 'EMAIL' | 'PASSWORD' | null,
+};
 
-type Props = {|
-  email?: string,
-  onChangeEmail: (string) => void,
-  password?: string,
-  onChangePassword: (string) => void,
-  setActiveTextInput: (InputType) => void,
-  activeTextInput?: ?InputType,
-  onSubmit: () => void,
-|};
+export default class Login extends Component<*, State> {
+  state = {
+    email: '',
+    password: '',
+    activeTextInput: null,
+  };
 
-function Login(props: Props) {
-  let {
-    email,
-    password,
-    activeTextInput,
-    setActiveTextInput,
-    onSubmit,
-    onChangeEmail,
-    onChangePassword,
-  } = props;
-  return (
-    <View style={styles.root}>
-      <KeyboardAvoidingView behavior="padding">
-        <View style={styles.header}>
-          <Image source={Logo} style={{height: 200}} resizeMode="contain" />
-        </View>
-        <View>
-          <Text>Username or Email</Text>
-          <TextInput
-            value={email}
-            onChangeText={onChangeEmail}
-            onFocus={() => setActiveTextInput('EMAIL')}
-            style={[
-              styles.textInput,
-              activeTextInput === 'EMAIL' && styles.activeTextInput,
-            ]}
+  render() {
+    let {email, password, activeTextInput} = this.state;
+    return (
+      <View style={styles.root}>
+        <KeyboardAvoidingView behavior="padding">
+          <View style={styles.header}>
+            <Image source={Logo} style={{height: 200}} resizeMode="contain" />
+          </View>
+          <View>
+            <Text>Username or Email</Text>
+            <TextInput
+              value={email}
+              onChangeText={(email) => this.setState({email})}
+              onFocus={() => this._setActiveTextInput('EMAIL')}
+              style={[
+                styles.textInput,
+                activeTextInput === 'EMAIL' && styles.activeTextInput,
+              ]}
+            />
+            <Text>Password</Text>
+            <TextInput
+              secureTextEntry
+              value={password}
+              onChangeText={(password) => this.setState({password})}
+              onFocus={() => this._setActiveTextInput('PASSWORD')}
+              style={[
+                styles.textInput,
+                activeTextInput === 'PASSWORD' && styles.activeTextInput,
+              ]}
+            />
+          </View>
+          <Button
+            text="SIGN IN"
+            onPress={() => {
+              this.props.navigation.navigate('dashboard');
+            }}
           />
-          <Text>Password</Text>
-          <TextInput
-            secureTextEntry
-            value={password}
-            onChangeText={onChangePassword}
-            onFocus={() => setActiveTextInput('PASSWORD')}
-            style={[
-              styles.textInput,
-              activeTextInput === 'PASSWORD' && styles.activeTextInput,
-            ]}
-          />
-        </View>
-        <Button text="SIGN IN" onPress={onSubmit} />
-      </KeyboardAvoidingView>
-    </View>
-  );
+        </KeyboardAvoidingView>
+      </View>
+    );
+  }
+
+  _setActiveTextInput(activeTextInput: 'EMAIL' | 'PASSWORD' | null) {
+    this.setState({
+      activeTextInput,
+    });
+  }
 }
 
 let styles = StyleSheet.create({
@@ -91,5 +96,3 @@ let styles = StyleSheet.create({
     marginBottom: 50,
   },
 });
-
-export default Login;
