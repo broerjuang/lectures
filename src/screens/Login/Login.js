@@ -8,113 +8,69 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import {connect} from 'react-redux';
 import Logo from '../../images/logo.png';
 import {Button, Text} from '../../core-ui';
 import {WHITE, BLUE_SEA, LIGHT_GREY} from '../../constants/colors';
 
-type InputType = 'EMAIL' | 'PASSWORD';
+import type {RootState} from '../../RootState';
+import type {RootAction} from '../../RootAction';
+import type {Dispatch} from 'redux';
 
-type Action =
-  | {type: 'ChangeEmail', email: string}
-  | {type: 'ChangePassword', password: string}
-  | {type: 'SetActiveTextInput', activeTextInput: InputType};
-
-const INITIAL_STATE = {
-  email: '',
-  password: '',
-  activeTextInput: null,
-};
-
-let reducer = (action: Action) => (state = INITIAL_STATE) => {
-  switch (action.type) {
-    case 'ChangeEmail': {
-      return {
-        ...state,
-        email: action.email,
-      };
-    }
-    case 'ChangePassword': {
-      return {
-        ...state,
-        password: action.password,
-      };
-    }
-    case 'SetActiveTextInput': {
-      return {
-        ...state,
-        activeTextInput: action.activeTextInput,
-      };
-    }
-  }
-};
-
-type State = {
+type Props = {
   email: string,
   password: string,
   activeTextInput: 'EMAIL' | 'PASSWORD' | null,
+  dispatch: Dispatch<RootAction>,
 };
 
-class Login extends React.Component<{}, State> {
-  state = {
-    email: '',
-    password: '',
-    activeTextInput: null,
-  };
-
-  render() {
-    let {email, password, activeTextInput} = this.state;
-    return (
-      <View style={styles.root}>
-        <KeyboardAvoidingView behavior="padding">
-          <View style={styles.header}>
-            <Image source={Logo} style={{height: 200}} resizeMode="contain" />
-          </View>
-          <View>
-            <Text>Username or Email</Text>
-            <TextInput
-              value={email}
-              onChangeText={(email) =>
-                this.dispatch({type: 'ChangeEmail', email})
-              }
-              onFocus={() =>
-                this.dispatch({
-                  type: 'SetActiveTextInput',
-                  activeTextInput: 'EMAIL',
-                })
-              }
-              style={[
-                styles.textInput,
-                activeTextInput === 'EMAIL' && styles.activeTextInput,
-              ]}
-            />
-            <Text>Password</Text>
-            <TextInput
-              secureTextEntry
-              value={password}
-              onChangeText={(password) =>
-                this.dispatch({type: 'ChangePassword', password})
-              }
-              onFocus={() =>
-                this.dispatch({
-                  type: 'SetActiveTextInput',
-                  activeTextInput: 'PASSWORD',
-                })
-              }
-              style={[
-                styles.textInput,
-                activeTextInput === 'PASSWORD' && styles.activeTextInput,
-              ]}
-            />
-          </View>
-          <Button text="SIGN IN" onPress={() => {}} />
-        </KeyboardAvoidingView>
-      </View>
-    );
-  }
-
-  dispatch = (action: Action) => {
-    this.setState(reducer(action));
-  };
+function Login(props: Props) {
+  let {email, password, activeTextInput, dispatch} = props;
+  return (
+    <View style={styles.root}>
+      <KeyboardAvoidingView behavior="padding">
+        <View style={styles.header}>
+          <Image source={Logo} style={{height: 200}} resizeMode="contain" />
+        </View>
+        <View>
+          <Text>Username or Email</Text>
+          <TextInput
+            value={email}
+            onChangeText={(email) => dispatch({type: 'ChangeEmail', email})}
+            onFocus={() =>
+              dispatch({
+                type: 'SetActiveTextInput',
+                activeTextInput: 'EMAIL',
+              })
+            }
+            style={[
+              styles.textInput,
+              activeTextInput === 'EMAIL' && styles.activeTextInput,
+            ]}
+          />
+          <Text>Password</Text>
+          <TextInput
+            secureTextEntry
+            value={password}
+            onChangeText={(password) =>
+              dispatch({type: 'ChangePassword', password})
+            }
+            onFocus={() =>
+              dispatch({
+                type: 'SetActiveTextInput',
+                activeTextInput: 'PASSWORD',
+              })
+            }
+            style={[
+              styles.textInput,
+              activeTextInput === 'PASSWORD' && styles.activeTextInput,
+            ]}
+          />
+        </View>
+        <Button text="SIGN IN" onPress={() => {}} />
+      </KeyboardAvoidingView>
+    </View>
+  );
 }
 
 let styles = StyleSheet.create({
@@ -139,4 +95,20 @@ let styles = StyleSheet.create({
   },
 });
 
-export default Login;
+let mapStateToProps = (state: RootState) => {
+  let {auth} = state;
+  return {
+    email: auth.email,
+    password: auth.password,
+    activeTextInput: auth.activeTextInput,
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  (dispatch: Dispatch<RootAction>) => {
+    return {
+      dispatch: dispatch,
+    };
+  },
+)(Login);
